@@ -1,0 +1,132 @@
+GIMP Palette
+Name: RGB Gradients
+Columns: 8
+#
+  0   0   0	Black
+ 17  17  17	Gray 1
+ 34  34  34	Gray 2
+ 51  51  51	Gray 3
+ 68  68  68	Gray 4
+ 85  85  85	Gray 5
+102 102 102	Gray 6
+119 119 119	Gray 7
+136 136 136	Gray 8
+153 153 153	Gray 9
+170 170 170	Gray 10
+187 187 187	Gray 11
+204 204 204	Gray 12
+221 221 221	Gray 13
+238 238 238	Gray 14
+255 255 255	White
+255   0   0	Red 15
+238   0   0	Red 14
+221   0   0	Red 13
+204   0   0	Red 12
+187   0   0	Red 11
+170   0   0	Red 10
+153   0   0	Red 9
+136   0   0	Red 8
+119   0   0	Red 7
+102   0   0	Red 6
+ 85   0   0	Red 5
+ 68   0   0	Red 4
+ 51   0   0	Red 3
+ 34   0   0	Red 2
+ 17   0   0	Red 1
+  0   0   0	Red 0
+255 255   0	Yellow 15
+238 238   0	Yellow 14
+221 221   0	Yellow 13
+204 204   0	Yellow 12
+187 187   0	Yellow 11
+170 170   0	Yellow 10
+153 153   0	Yellow 9
+136 136   0	Yellow 8
+119 119   0	Yellow 7
+102 102   0	Yellow 6
+ 85  85   0	Yellow 5
+ 68  68   0	Yellow 4
+ 51  51   0	Yellow 3
+ 34  34   0	Yellow 2
+ 17  17   0	Yellow 1
+  0   0   0	Yellow 0
+  0 255   0	Green 15
+  0 238   0	Green 14
+  0 221   0	Green 13
+  0 204   0	Green 12
+  0 187   0	Green 11
+  0 170   0	Green 10
+  0 153   0	Green 9
+  0 136   0	Green 8
+  0 119   0	Green 7
+  0 102   0	Green 6
+  0  85   0	Green 5
+  0  68   0	Green 4
+  0  51   0	Green 3
+  0  34   0	Green 2
+  0  17   0	Green 1
+  0   0   0	Green 0
+  0 255 255	Cyan 15
+  0 238 238	Cyan 14
+  0 221 221	Cyan 13
+  0 204 204	Cyan 12
+  0 187 187	Cyan 11
+  0 170 170	Cyan 10
+  0 153 153	Cyan 9
+  0 136 136	Cyan 8
+  0 119 119	Cyan 7
+  0 102 102	Cyan 6
+  0  85  85	Cyan 5
+  0  68  68	Cyan 4
+  0  51  51	Cyan 3
+  0  34  34	Cyan 2
+  0  17  17	Cyan 1
+  0   0   0	Cyan 0
+  0   0 255	Blue 15
+  0   0 238	Blue 14
+  0   0 221	Blue 13
+  0   0 204	Blue 12
+  0   0 187	Blue 11
+  0   0 170	Blue 10
+  0   0 153	Blue 9
+  0   0 136	Blue 8
+  0   0 119	Blue 7
+  0   0 102	Blue 6
+  0   0  85	Blue 5
+  0   0  68	Blue 4
+  0   0  51	Blue 3
+  0   0  34	Blue 2
+  0   0  17	Blue 1
+  0   0   0	Blue 0
+255   0 255	Magenta 15
+238   0 238	Magenta 14
+221   0 221	Magenta 13
+204   0 204	Magenta 12
+187   0 187	Magenta 11
+170   0 170	Magenta 10
+153   0 153	Magenta 9
+136   0 136	Magenta 8
+119   0 119	Magenta 7
+102   0 102	Magenta 6
+ 85   0  85	Magenta 5
+ 68   0  68	Magenta 4
+ 51   0  51	Magenta 3
+ 34   0  34	Magenta 2
+ 17   0  17	Magenta 1
+  0   0   0	Magenta 0
+255 255 255	White
+238 238 238	Gray 14
+221 221 221	Gray 13
+204 204 204	Gray 12
+187 187 187	Gray 11
+170 170 170	Gray 10
+153 153 153	Gray 9
+136 136 136	Gray 8
+119 119 119	Gray 7
+102 102 102	Gray 6
+ 85  85  85	Gray 5
+ 68  68  68	Gray 4
+ 51  51  51	Gray 3
+ 34  34  34	Gray 2
+ 17  17  17	Gray 1
+  0   0   0	Black
