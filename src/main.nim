@@ -1,16 +1,7 @@
-import nico
-import sequtils
-import seqmath
-import math
 import random
-import sugar
-import arraymancer as arrman
-import arraymancer/tensor/private/p_accessors
-import algorithm
-import macros
-
 
 include polycore
+
 using
   pos, vect: Position
   obj: var Cell
@@ -21,8 +12,6 @@ using
 nico.init("Cubix", "polycore")
 setPalette loadPaletteFromGPL "RGB Gradients.gpl"
 randomize()
-
-var debugs = false
 
 
 var
@@ -79,12 +68,19 @@ proc draw(obj: Cell, pos) =
   setColor obj.color
   boxfill(x, y, cellScale, cellScale)
 
+proc draw(obj: CellObj, pos) =
+  let (x, y) = pos.toCoords
+  setColor obj.color
+  boxfill(x, y, cellScale, cellScale)
+
 proc drawBoard() =
   setColor 0
   boxfill(0, 0, screenWidth, screenHeight)
   
-  for pos, cell in maze:
+  for pos, cell in maze.cells:
     draw cell, pos
+    if (cell.cellObjs[].len > 0):
+      draw cell.cellObjs[0], pos
 
 #[ proc toPos(cx, cy: int): Position = # Ditch moues controls
   var
@@ -123,26 +119,10 @@ proc drawBoard() =
 proc toPos(coords: (int, int)): Position = toPos(coords[0], coords[1]) ]#
 
 
-proc attemptToMove(obj, vect) =
-  var moveResult: Position = eAdd(obj.pos, vect)
-
-  for (s, r) in zip(size, moveResult):
-    if debugs: echo (width: s, position: r)
-    if r notin 0 ..< s:
-      if debugs: echo "Out of bounds: width - pos = ", s - abs(r), "! Thats no good..."
-      return
-  
-  obj.pos = moveResult
-
-  # if maze.atIndex(moveResult).pushable:
-    # attemptToMove(maze.atIndex(moveResult), vect)
-
-
-
-proc moveBy(obj: var Cell, dim: Natural, amt: int) =
+proc moveBy(obj: var CellObj, dim: Natural, amt: int) =
   var vector = newSeq[int](dims)
   vector[dim-1] = amt
-  if debugs: echo eAdd(vector, obj.pos), " - ", vector
+  if obj.containingCell[].get().maze[].get().debugMode: echo eAdd(vector, obj.containingCell[].get().pos), " - ", vector
   obj.attemptToMove vector
 
 #[ proc mouseClicked() =
@@ -164,7 +144,7 @@ proc arrowAction() =
   # Dimension shifting
   # min = 1
   # max = Dims
-  if keyp(K_LSHIFT):
+  if key(K_LSHIFT):
     if keyp(K_RIGHT):
       shiftVal += 2
       if shiftVal > dims:
@@ -174,47 +154,16 @@ proc arrowAction() =
       if shiftVal < 1:
         shiftVal = dims - 1
     # View shifting
-    
+  else:  
   # Movement
-  if K_RIGHT.keypr 10: player.moveBy shiftVal, 1
-  elif K_LEFT.keypr 10: player.moveBy shiftVal, -1
+    for cellObj in maze.playerControlledObjs[].mitems:
+      if K_RIGHT.keypr 10: cellObj.moveBy shiftVal, 1
+      elif K_LEFT.keypr 10: cellObj.moveBy shiftVal, -1
 
-  if shiftVal != dims:
-    if K_DOWN.keypr 10: player.moveBy (shiftVal + 1), 1
-    elif K_UP.keypr 10: player.moveBy (shiftVal + 1), -1
+      if shiftVal != dims:
+        if K_DOWN.keypr 10: cellObj.moveBy (shiftVal + 1), 1
+        elif K_UP.keypr 10: cellObj.moveBy (shiftVal + 1), -1
 
-
-#[ proc getAllCoords*() =
-  echo "OBJECT POSES TO COORDS TO POSES AGAIN:"
-  for i, item in maze:
-    echo i.reversed, " => ", i.reversed.toCoords, " => ", i.reversed.toCoords.toPos
-
-proc checkRightPositions*() =
-  let mouseCoordsA = mouse()
-  echo "Mouse coords: ", mouseCoordsA
-  var mousePos = mouseCoordsA.toPos()
-  echo "Mouse coords as pos: ", mousePos
-
-  let mazeItem =
-    if mousePos == player.pos: "player"
-    elif mousePos == target.pos: "target"
-    else:
-      try:
-        if maze.atIndex(mousePos) == space: "space"
-        else: "wall"
-      except: "unknown"
-
-  echo "Item at mousePos: ", mazeItem
-
-  let mouseCoordsB = mousePos.toCoords()
-  echo "Mouse pos back to coords: ", mouseCoordsB
-  echo "Mouse coords rounded: ",
-    (mouseCoordsB.x - (mouseCoordsB.x mod cellScale),
-     mouseCoordsB.y - (mouseCoordsB.y mod cellScale))
-  if
-    mouseCoordsA[0] notin mouseCoordsB[0]..mouseCoordsB[0]+cellScale and
-    mouseCoordsA[1] notin mouseCoordsB[1]..mouseCoordsB[1]+cellScale:
-    echo "...Which is wrong." ]#
 
 proc checkProperScale*() =
   echo "Board size: ", (boardWidth(), boardHeight()), "; ",
@@ -244,38 +193,52 @@ proc mazeInit() =
 
   size = @[4, 4, 4, 4]
   dims = size.len
-  maze = newTensorWith[Cell](prod(size), space).reshape(size) # Just a bit awkward because newTensorWith sucks when "shape" is varargs.
-  maze[0, 0, 0, 0] = player
-  player.pos = @[0, 0, 0, 0]
+  maze.size = size
+  maze.cells = newTensor[Cell](size) # Just a bit awkward because newTensorWith sucks when "shape" is varargs.
+  new (maze.target)
+  new(maze.playerControlledObjs)
+  for (pos, _) in maze.cells.pairs:
+    var newSpace = makeSpace()
+    maze.cells.atIndexMut(pos, newSpace)
+    maze.cells.atIndex(pos).pos = pos
+    maze.cells.atIndex(pos).maze[] = some(maze)
+  var player = makePlayer()
+  maze.cells.atIndex(0, 0, 0, 0).cellObjs[].add(player)
+  player.containingCell[] = some(maze.cells.atIndex(0, 0, 0, 0))
+  maze.playerControlledObjs[].add(player)
+
+  var target = makeTarget()
+  maze.cells.atIndex(3, 3, 3, 3).cellObjs[].add(target)
+  target.containingCell[] = some(maze.cells.atIndex(3, 3, 3, 3))
+  maze.target[] = some(target)
 
   nico.setTargetSize(boardWidth(), boardHeight())
   nico.setScreenSize(boardWidth(), boardHeight())
   drawBoard()
 
 proc getInput(dt: float32) =
-  if debugs:
+  if maze.debugMode:
     # if keyp(K_C): getAllCoords()
     if keyp(K_F): echo "Current movement plane: ", shiftVal
-    elif keyp(K_A): echo "Player at ", player.pos, ", Goal at ", target.pos
+
     elif keyp(K_S): checkProperScale()
 
     # if keyp(K_P) and mousebtnp(0): checkRightPositions()
 
-    if keyp(K_D): debugs = false
+    if keyp(K_D): maze.debugMode = false
 
-  elif keyp(K_D): debugs = true
-
-
+  elif keyp(K_D): maze.debugMode = true
   cellScale += mousewheel()
   if mousewheel() == 1:
     offset /= 2
   elif mousewheel() == -1:
     offset *= 2
-
   # if mousebtn(0): mouseClicked()
   arrowAction()
-
-  if target.pos == player.pos or keyp(K_R): mazeInit()
+  for (_, obj) in maze.playerControlledObjs[].pairs:
+    var target = maze.target[].get()
+    if keyp(K_A): echo "Player at ", obj.containingCell[].get().pos, ", Goal at ", target.containingCell[].get().pos
+    if target.containingCell[].get().pos == obj.containingCell[].get().pos or keyp(K_R): mazeInit()
 
 
 nico.createWindow("polycore", 128, 128)

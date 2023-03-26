@@ -1,7 +1,10 @@
 import colors
+import options
 import nico
-import arraymancer
-
+import sequtils
+import seqmath
+import arraymancer as arrman
+import arraymancer/tensor/private/p_accessors
 
 # Types
 type
@@ -12,35 +15,32 @@ type
   Path* = seq[Position]
 
 type
-  # Different cell types.
-  CellObj* = enum
-    cPlayer,
-    cMob,
-    cBlock
+  # Sometimes, Cells contain CellObjs; this can be a 
+  CellObj* = object
+    color*: Color
+    containingCell*: ref Option[Cell] # The cell that contains this CellObj
+    usePlayerInput*: bool # Use the player's input to control this object.
+    inv*: ref seq[CellObj] # The inventory of the player.
+    bumpedInto*: proc(obj: var CellObj, bumper: var CellObj): void
+    hostile*: bool # Can this object hurt the player?
+    moveset*: proc(): seq[seq[int]] # A proc that outputs a certain path to follow; basically the CellObj's AI.
 
   # Every Maze is made up of Cells.
   Cell* = object
     color*: Color
     pos*: seq[int]
-    layer*, layerHeight*: int # Yeah, this maze may have an extra dimension. Oh well. layer determines collision, player = 1, space = 0, bird = 2, water = -1... layerHeight determines how many layers "tall" a cell is. 
-    hostile*: bool # If false, dmg is nullified.
-    hp*, dmg*, def*, spd*: int # Stats. hp-dmg+def for combat, movement speed in squares per turn is spd.
-    moveset*: proc(): seq[seq[int]] # If a series of conditions is fulfilled, output a certain path to follow.
+    cellObjs*: ref seq[CellObj]
+    solid*: bool
+    maze*: ref Option[Maze]
 
-    case obj: CellObj
-      of cPlayer:
-        inv*: seq[Cell] # The inventory of the player.
-        mirror*: seq[int] # Flip movement along the desired axis if non-zero
-        rotAxis*: int # Rotate movement 90 deg. along the desired axis if non-zero
-      of cMob:
-        drops*: seq[Cell] # Stuff that drops when the mob is killed.
-        mimic*: bool # Mimic the main player character movement (non-rotated/flipped) Good for something like an "evil player" that kills other players.
-      of cBlock:
-        pushable*: bool # Can this be pushed?
-        isItem*: bool # Is this able to be picked up by a player?
+  # The maze itself has a tensor made of cells.
+  Maze* = object
+    cells*: Tensor[Cell]
+    size*: seq[int]
+    debugMode*: bool
+    playerControlledObjs*: ref seq[CellObj]
+    target*: ref Option[CellObj]
 
-  # The maze itself is a tensor made of cells.
-  Maze* = Tensor[Cell]
 
 
   #[
@@ -55,14 +55,65 @@ type
     ]#
 
 
+proc attemptToMove(obj: var CellObj, vect: seq[int]) =
+  if (obj.containingCell[].isNone()):
+    return
+  var moveResult: Position = eAdd(obj.containingCell[].get().pos, vect)
+  var maze = obj.containingCell[].get().maze[].get()
+  for (s, r) in zip(maze.size, moveResult):
+    if maze.debugMode: echo (width: s, position: r)
+    if r notin 0 ..< s:
+      if maze.debugMode: echo "Out of bounds: width - pos = ", s - abs(r), "! Thats no good..."
+      return
+  
+  obj.containingCell[].get().cellObjs[].delete(obj.containingCell[].get().cellObjs[].find(obj))
+  obj.containingCell[] = some(maze.cells.atIndex(moveResult))
+  maze.cells.atIndex(moveResult).cellObjs[].add(obj)
+
+
+  # if maze.atIndex(moveResult).pushable:
+    # attemptToMove(maze.atIndex(moveResult), vect)
+
+# Object bumpedInto procs
+proc pushObj(obj: var CellObj, bumper: var CellObj): void =
+  if (obj.containingCell[].isNone()) or (bumper.containingCell[].isNone()):
+    return
+  var bumperPos = bumper.containingCell[].get().pos
+  var objPos = obj.containingCell[].get().pos
+  
+  attemptToMove(obj, eSub(objPos, bumperPos))
+  return
+
 # In-game objects
 
-var
-  player* = Cell(pos: @[0], obj: cPlayer, color: Color(0x0000FF))
-  target* = Cell(pos: @[0], obj: cBlock, color: Color(0x00FF00))
-  wall* = Cell(pos: @[0], obj: cBlock, color: Color(0x000000))
-  space* = Cell(pos: @[0], obj: cBlock, color: Color(0xFFFFFF))
-  crate* = Cell(pos: @[0], obj: cBlock, color: Color(0xAAAA00), pushable: true)
+
+
+proc makePlayer*(): CellObj =
+  var container = Option[Cell].new()
+  container[] = none(Cell)
+  return CellObj(color: Color(0x0000FF), containingCell: container, usePlayerInput: true)
+  
+proc makeTarget*(): CellObj =
+  var container = Option[Cell].new()
+  container[] = none(Cell)
+  return CellObj(color: Color(0x00FF00), containingCell: container)
+  
+proc makeCrate*(): CellObj =
+  var container = Option[Cell].new()
+  container[] = none(Cell)
+  return CellObj(color: Color(0xAAAA00), containingCell: container, bumpedInto: pushObj)
+
+proc makeSpace(): Cell = 
+  var container = Option[Maze].new()
+  container[] = none(Maze)
+  return Cell(color: Color(0xFFFFFF), maze: container, solid: false, cellObjs: seq[CellObj].new())
+
+proc makeWall(): Cell = 
+  var container = Option[Maze].new()
+  container[] = none(Maze)
+  return Cell(color: Color(0x000000), maze: container, solid: true, cellObjs: seq[CellObj].new())
+
+
   # If Cell.hostile = true, do Cell.damage upon collision with player.
   # May add a way to Pacify Mobs so that attacks do no damage.
   # mook* = Cell(pos: @[0], obj: cMob, color: Color(0xFF0000), hp: 1, def: 0, spd: 1, hostile: true, dmg: 1)
