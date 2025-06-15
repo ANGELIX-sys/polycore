@@ -1,17 +1,16 @@
-import random
-
-include polycore
+include
+  polycore,
+  levels
 
 using
   pos, vect: Position
-  obj: var Cell
+  obj: var CellObj
 
-# import debugs
+var debugs: bool = true
 
 
 nico.init("Cubix", "polycore")
 setPalette loadPaletteFromGPL "RGB Gradients.gpl"
-randomize()
 
 
 var
@@ -22,7 +21,7 @@ var
 
 var
   cellScale: int
-  offset: float
+  offset: int
 
 proc boardWidth(a1 = 0, a2 = 2): int =
   result = (size[a1] * size[a2] + size[a2] - 1) * cellScale
@@ -31,12 +30,12 @@ proc boardHeight(a1 = 1, a2 = 3): int =
   result = (size[a1] * size[a2] + size[a2] - 1) * cellScale
 
 proc toCoords(pos): tuple[x: int, y: int] =
-  proc coordsHalf(half: int): int =
+  proc coordsHalf(offset: int): int =
     var
-      i = half
-      j = 2
-      k = 1
-      m = 0
+      i           = offset # current dimension pair
+      j           = 2      # current dimension pair "index" (size div 2)
+      addToResult = 1      # added to result
+      spaces      = 0      # amount of space between slices, increases by 1 per dimensional pair iterated
     result = pos[i]
     if dims <= 2:
       result *= cellScale
@@ -44,16 +43,16 @@ proc toCoords(pos): tuple[x: int, y: int] =
     else:
       while i < dims-2:
         i += 2
-        j = 2 # 
-        k = 1 # Added to result
-        m = 0 # Barrier between dimensions, increases by one per pair of dimensions
+        j = 2
+        addToResult = 1
+        spaces = 0
         while j < dims:
           if j <= i:
-            k *= size[i-j] + m
-            k -= m
+            addToResult *= size[i-j] + spaces
+            addToResult -= spaces
           j += 2
-          m += 1
-        result += (k + i div 2) * pos[i]
+          spaces += 1
+        result += (addToResult + i div 2) * pos[i]
     result *= cellScale
   
   (x: coordsHalf(0),
@@ -62,11 +61,6 @@ proc toCoords(pos): tuple[x: int, y: int] =
   # What it actually is:
   # d0 + d2 * (size[d1] + 1) + d4 * ((size[d1] + 1) * (size[d3] + 2))???
 
-
-proc draw(obj: Cell, pos) =
-  let (x, y) = pos.toCoords
-  setColor obj.color
-  boxfill(x, y, cellScale, cellScale)
 
 proc draw(obj: CellObj, pos) =
   let (x, y) = pos.toCoords
@@ -78,35 +72,35 @@ proc drawBoard() =
   boxfill(0, 0, screenWidth, screenHeight)
   
   for pos, cell in maze.cells:
-    draw cell, pos
+    draw makeSpace(), pos
     if (cell.cellObjs[].len > 0):
       draw cell.cellObjs[0], pos
 
-#[ proc toPos(cx, cy: int): Position = # Ditch moues controls
+proc toPos(cx, cy: int): Position = # Ditch moues controls
   var
     val: int
     doDiv: seq[bool] = newSeq[bool](dims div 2)
 
   for i in 0..<dims: # This is going to be a doozy to explain
     if i mod 2 == 0:
-      if debugs and keyp(K_L): dump cx div cellScale - offset
+      if debugs and keyp(K_L): echo cx div cellScale - offset
       val = cx div cellScale - offset
     else:
-      if debugs and keyp(K_L): dump cy div cellScale - offset
+      if debugs and keyp(K_L): echo cy div cellScale - offset
       val = cy div cellScale - offset
     
     if dims > 2:
       for j in 0..<(dims div 2):
         if doDiv[j]:
           if debugs and keyp(K_L):
-            dump size[i] + j
-            dump val div (size[i] + j)
+            echo size[i] + j
+            echo val div (size[i] + j)
 
           val = val div (size[i] + j)
         else:
           if debugs and keyp(K_L):
-            dump size[i] + j
-            dump val mod (size[i] + j)
+            echo size[i] + j
+            echo val mod (size[i] + j)
 
           val = val mod (size[i] + j)
           if i mod 2 == 1:
@@ -116,7 +110,7 @@ proc drawBoard() =
     result &= val
   if debugs and keyp(K_L): echo result
 
-proc toPos(coords: (int, int)): Position = toPos(coords[0], coords[1]) ]#
+proc toPos(coords: (int, int)): Position = toPos(coords[0], coords[1])
 
 
 proc moveBy(obj: var CellObj, dim: Natural, amt: int) =
@@ -156,13 +150,13 @@ proc arrowAction() =
     # View shifting
   else:  
   # Movement
-    for cellObj in maze.playerControlledObjs[].mitems:
-      if K_RIGHT.keypr 10: cellObj.moveBy shiftVal, 1
-      elif K_LEFT.keypr 10: cellObj.moveBy shiftVal, -1
+    for cellObj in maze.playerControlledObjs[].mitems: # make ts mutable i swear to fuck. also why is [] there (please find out)
+      if K_RIGHT.keypr 10: cellObj.moveBy(shiftVal, 1)
+      elif K_LEFT.keypr 10: cellObj.moveBy(shiftVal, -1)
 
       if shiftVal != dims:
-        if K_DOWN.keypr 10: cellObj.moveBy (shiftVal + 1), 1
-        elif K_UP.keypr 10: cellObj.moveBy (shiftVal + 1), -1
+        if K_DOWN.keypr 10: cellObj.moveBy(shiftVal + 1, 1)
+        elif K_UP.keypr 10: cellObj.moveBy(shiftVal + 1, -1)
 
 
 proc checkProperScale*() =
@@ -195,13 +189,15 @@ proc mazeInit() =
   dims = size.len
   maze.size = size
   maze.cells = newTensor[Cell](size) # Just a bit awkward because newTensorWith sucks when "shape" is varargs.
+
   new (maze.target)
-  new(maze.playerControlledObjs)
-  for (pos, _) in maze.cells.pairs:
+  # new (maze.playerControlledObjs)
+  for pos, _ in maze.cells.pairs:
     var newSpace = makeSpace()
-    maze.cells.atIndexMut(pos, newSpace)
+    maze.cells.atIndex(pos).cellObjs[].add(newSpace)
     maze.cells.atIndex(pos).pos = pos
     maze.cells.atIndex(pos).maze[] = some(maze)
+  
   var player = makePlayer()
   maze.cells.atIndex(0, 0, 0, 0).cellObjs[].add(player)
   player.containingCell[] = some(maze.cells.atIndex(0, 0, 0, 0))
@@ -217,11 +213,13 @@ proc mazeInit() =
   drawBoard()
 
 proc getInput(dt: float32) =
-  if maze.debugMode:
+  if debugs:
     # if keyp(K_C): getAllCoords()
     if keyp(K_F): echo "Current movement plane: ", shiftVal
 
     elif keyp(K_S): checkProperScale()
+
+    if keyp(K_M): echo mouse().toPos()
 
     # if keyp(K_P) and mousebtnp(0): checkRightPositions()
 
@@ -229,13 +227,13 @@ proc getInput(dt: float32) =
 
   elif keyp(K_D): maze.debugMode = true
   cellScale += mousewheel()
-  if mousewheel() == 1:
+  #[ if mousewheel() == 1:
     offset /= 2
   elif mousewheel() == -1:
-    offset *= 2
+    offset *= 2 ]#
   # if mousebtn(0): mouseClicked()
   arrowAction()
-  for (_, obj) in maze.playerControlledObjs[].pairs:
+  for _, obj in maze.playerControlledObjs[].pairs:
     var target = maze.target[].get()
     if keyp(K_A): echo "Player at ", obj.containingCell[].get().pos, ", Goal at ", target.containingCell[].get().pos
     if target.containingCell[].get().pos == obj.containingCell[].get().pos or keyp(K_R): mazeInit()

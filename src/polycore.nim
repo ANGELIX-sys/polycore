@@ -17,6 +17,7 @@ type
 type
   # Sometimes, Cells contain CellObjs; this can be a 
   CellObj* = object
+    solid*: bool
     color*: Color
     containingCell*: ref Option[Cell] # The cell that contains this CellObj
     usePlayerInput*: bool # Use the player's input to control this object.
@@ -27,10 +28,8 @@ type
 
   # Every Maze is made up of Cells.
   Cell* = object
-    color*: Color
     pos*: seq[int]
     cellObjs*: ref seq[CellObj]
-    solid*: bool
     maze*: ref Option[Maze]
 
   # The maze itself has a tensor made of cells.
@@ -40,7 +39,6 @@ type
     debugMode*: bool
     playerControlledObjs*: ref seq[CellObj]
     target*: ref Option[CellObj]
-
 
 
   #[
@@ -85,9 +83,6 @@ proc pushObj(obj: var CellObj, bumper: var CellObj): void =
   return
 
 # In-game objects
-
-
-
 proc makePlayer*(): CellObj =
   var container = Option[Cell].new()
   container[] = none(Cell)
@@ -103,16 +98,15 @@ proc makeCrate*(): CellObj =
   container[] = none(Cell)
   return CellObj(color: Color(0xAAAA00), containingCell: container, bumpedInto: pushObj)
 
-proc makeSpace(): Cell = 
-  var container = Option[Maze].new()
-  container[] = none(Maze)
-  return Cell(color: Color(0xFFFFFF), maze: container, solid: false, cellObjs: seq[CellObj].new())
+proc makeSpace*(): CellObj = 
+  var container = Option[Cell].new()
+  container[] = none(Cell)
+  return CellObj(color: Color(0xFFFFFF), containingCell: container, solid: false)
 
-proc makeWall(): Cell = 
-  var container = Option[Maze].new()
-  container[] = none(Maze)
-  return Cell(color: Color(0x000000), maze: container, solid: true, cellObjs: seq[CellObj].new())
-
+proc makeWall*(): CellObj = 
+  var container = Option[Cell].new()
+  container[] = none(Cell)
+  return CellObj(color: Color(0x000000), containingCell: container, solid: true)
 
   # If Cell.hostile = true, do Cell.damage upon collision with player.
   # May add a way to Pacify Mobs so that attacks do no damage.
