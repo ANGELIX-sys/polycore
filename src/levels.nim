@@ -1,27 +1,26 @@
-import polycore
 import sequtils
 import seqmath
 import math
 import sugar
 import arraymancer as arrman
 import arraymancer/tensor/private/p_accessors
+import polycore
 
 
-type
-  Level = object
-    layout: Tensor[int]
-    legend: seq[CellObj]
-  World = seq[Level]
+type World = seq[array[2, seq[int]]]
 
-let test* = Level(
-  layout: [
-    [2,  1,  0,  0,  0,  1],
-    [0,  1,  0,  1,  0,  1],
-    [0,  1,  0,  1,  0,  1],
-    [0,  1,  0,  1,  0,  1],
-    [0,  1,  0,  1,  0,  1],
-    [0,  0,  0,  1,  0,  3]
-  ].toTensor(),
-  legend: @[
-    makeSpace(), makeWall(), makePlayer(), makeTarget() # replace makeSpace() with a normal white rectangle in mazeInit()
-  ])
+
+const poly*: World = @[ # Goal: 50 Levels
+  # Polycore, world 1. Introduction to multidimensional mazes.
+  [
+    @[6, 6], # Shape
+    @[ # Layout
+      2,  1,  0,  0,  0,  1,
+      0,  1,  0,  1,  0,  1,
+      0,  1,  0,  1,  0,  1,
+      0,  1,  0,  1,  0,  1,
+      0,  1,  0,  1,  0,  1,
+      0,  0,  0,  1,  0,  3
+    ]
+  ]
+]
