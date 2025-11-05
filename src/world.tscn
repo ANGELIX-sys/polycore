@@ -1,0 +1,31 @@
+[gd_scene load_steps=7 format=4 uid="uid://b15opsa2j5oxv"]
+
+[ext_resource type="PackedScene" uid="uid://d2h1nny8ryv1g" path="res://player.tscn" id="1_fj7yv"]
+[ext_resource type="PackedScene" uid="uid://13yfgvthfmke" path="res://floor.tscn" id="1_tlwt5"]
+
+[sub_resource type="TileSetScenesCollectionSource" id="TileSetScenesCollectionSource_aqk2v"]
+scenes/1/scene = ExtResource("1_tlwt5")
+
+[sub_resource type="TileSet" id="TileSet_tlwt5"]
+sources/0 = SubResource("TileSetScenesCollectionSource_aqk2v")
+
+[sub_resource type="TileSetScenesCollectionSource" id="TileSetScenesCollectionSource_tlwt5"]
+scenes/1/scene = ExtResource("1_fj7yv")
+
+[sub_resource type="TileSet" id="TileSet_f3sb7"]
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetScenesCollectionSource_tlwt5")
+
+[node name="Node2D" type="Node2D"]
+scale = Vector2(2, 2)
+
+[node name="Floor" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAABAAEAAAAAAAAAAQACAAEAAAAAAAAAAQACAAIAAAAAAAAAAQABAAIAAAAAAAAAAQAEAAEAAAAAAAAAAQAEAAIAAAAAAAAAAQAFAAIAAAAAAAAAAQAFAAEAAAAAAAAAAQAFAAQAAAAAAAAAAQAEAAQAAAAAAAAAAQAEAAUAAAAAAAAAAQAFAAUAAAAAAAAAAQACAAQAAAAAAAAAAQABAAQAAAAAAAAAAQABAAUAAAAAAAAAAQACAAUAAAAAAAAAAQA=")
+tile_set = SubResource("TileSet_tlwt5")
+
+[node name="Controllable" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAABAAEAAAAAAAAAAQA=")
+tile_set = SubResource("TileSet_f3sb7")
+
+[node name="Wall" type="TileMapLayer" parent="."]
+tile_set = SubResource("TileSet_f3sb7")
