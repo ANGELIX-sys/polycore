@@ -15,7 +15,7 @@
       pkgs.mkShell
         {
           buildInputs = [
-            pkgs.godot
+            pkgs.godotPackages_4_5.godot
           ];
 
           shellHook = ''

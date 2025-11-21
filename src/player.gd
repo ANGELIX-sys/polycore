@@ -4,7 +4,7 @@ var stored_dir = dirs.NONE
 # var move_mode
 
 func do_input():
-	var do_shift = Input.is_action_just_pressed("move_modifier");
+	var do_shift = Input.is_action_pressed("move_modifier")
 	
 	if Input.is_action_just_pressed("move_right"):
 		stored_dir = dirs.KATA if do_shift else dirs.EAST
@@ -18,10 +18,10 @@ func do_input():
 	# if Input.is_action_just_pressed("reset_level") # IMPLEMENT LATER
 
 func _process(delta):
+	do_input()
 	super(_process)
-	shift_val = 8 if stored_dir % 2 == 1 else 40
 	
-	if stored_dir && slide >= 1:
+	if stored_dir >= 0 && slide >= 1:
 		movement_direction = stored_dir
 		stored_dir = 0
 		do_move()

@@ -1,0 +1,58 @@
+{
+	"categories": [
+		{
+			"uuid": "afd2d2d1-ccc6-4cf5-bb95-2df05d4f6786",
+			"title": "Task",
+			"color": "70bafa"
+		}
+	],
+	"stages": [
+		{
+			"uuid": "885c22cc-f2c9-41fc-9630-12d2c7a377e0",
+			"title": "Todo",
+			"tasks": [
+				"a8170c4b-14e1-4e3f-a28b-1e975339b363",
+				"ffe22a99-ff79-4b5f-9b1c-56a90d78dbee"
+			]
+		},
+		{
+			"uuid": "ac96c23e-ebfb-4949-acb5-8a3821a5ff3b",
+			"title": "Doing",
+			"tasks": []
+		},
+		{
+			"uuid": "f395cfde-8b14-4e90-b058-3de4d79dc93a",
+			"title": "Done",
+			"tasks": []
+		}
+	],
+	"tasks": [
+		{
+			"uuid": "a8170c4b-14e1-4e3f-a28b-1e975339b363",
+			"title": "Jump Pads",
+			"description": "",
+			"category": "afd2d2d1-ccc6-4cf5-bb95-2df05d4f6786",
+			"steps": []
+		},
+		{
+			"uuid": "ffe22a99-ff79-4b5f-9b1c-56a90d78dbee",
+			"title": "Boxen and Multipush",
+			"description": "",
+			"category": "afd2d2d1-ccc6-4cf5-bb95-2df05d4f6786",
+			"steps": []
+		}
+	],
+	"layout": {
+		"columns": [
+			[
+				"885c22cc-f2c9-41fc-9630-12d2c7a377e0"
+			],
+			[
+				"ac96c23e-ebfb-4949-acb5-8a3821a5ff3b"
+			],
+			[
+				"f395cfde-8b14-4e90-b058-3de4d79dc93a"
+			]
+		]
+	}
+}
