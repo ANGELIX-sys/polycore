@@ -11,8 +11,8 @@
 			"uuid": "885c22cc-f2c9-41fc-9630-12d2c7a377e0",
 			"title": "Todo",
 			"tasks": [
-				"a8170c4b-14e1-4e3f-a28b-1e975339b363",
-				"ffe22a99-ff79-4b5f-9b1c-56a90d78dbee"
+				"ffe22a99-ff79-4b5f-9b1c-56a90d78dbee",
+				"a8170c4b-14e1-4e3f-a28b-1e975339b363"
 			]
 		},
 		{
@@ -29,7 +29,7 @@
 	"tasks": [
 		{
 			"uuid": "a8170c4b-14e1-4e3f-a28b-1e975339b363",
-			"title": "Jump Pads",
+			"title": "Force Pads",
 			"description": "",
 			"category": "afd2d2d1-ccc6-4cf5-bb95-2df05d4f6786",
 			"steps": []

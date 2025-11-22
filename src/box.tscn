@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://nunbshsjdqhh"]
+
+[ext_resource type="Script" uid="uid://bnbf7dny25jw4" path="res://box.gd" id="1_oq5cr"]
+[ext_resource type="Texture2D" uid="uid://q7ytp7ysuvqs" path="res://sprites.png" id="2_bqn3j"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oq5cr"]
+atlas = ExtResource("2_bqn3j")
+region = Rect2(0, 48, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_n7ghd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oq5cr")
+}],
+"loop": true,
+"name": &"bocks",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4flbx"]
+size = Vector2(16, 16)
+
+[node name="Box" type="CharacterBody2D" groups=["pushable"]]
+motion_mode = 1
+script = ExtResource("1_oq5cr")
+
+[node name="BoxSprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_n7ghd")
+animation = &"bocks"
+centered = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("RectangleShape2D_4flbx")

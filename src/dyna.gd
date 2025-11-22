@@ -1,24 +1,11 @@
-class_name Dyna extends CharacterBody2D
+class_name Dyna extends RoomObject
+@export var slide = 1.0
+@export var shift_multiplier = 1
+@export var movement_direction = dirs.NONE
+@export var next_pos: Vector4i = Vector4i(0, 0, 0, 0)
 
-var slide = 1.0
-var calculate_move = false
-var shift_multiplier = 1
-var zoom_val = 16
-var movement_direction = dirs.NONE
-var next_pos: Vector4i = Vector4i(0, 0, 0, 0)
-
-# represents the players position in the current room
-# room coords -> pixel coords: 16*(((obj_room_coords.x+1)*obj_room_coords.z)-1)
-var current_pos: Vector4i = Vector4i(0, 0, 0, 0)
-# represents the current room the player is located in, NYI
-var current_loc: Vector4i = Vector4i(0, 0, 0, 0)
-
-func pos_to_pixels(pos: Vector4i = current_pos):
-	var converted_pixels: Vector2
-	# ((global.room_dims.x + 1) * pos.z) + pos.x
-	converted_pixels.x = (((global.room_dims.x + 1) * pos.z) + pos.x + 1) * zoom_val + (zoom_val / 2)
-	converted_pixels.y = (((global.room_dims.y + 1) * pos.w) + pos.y + 1) * zoom_val + (zoom_val / 2)
-	return converted_pixels
+func _ready():
+	current_pos = start_pos
 
 func do_slide():
 	if slide < 1:
@@ -55,21 +42,28 @@ func do_move():
 	if movement_direction == dirs.UP:
 		next_pos.w -= shift_multiplier
 	
-	shift_multiplier = 1
-	
 	global.colliders = [ self ] # Replace this line with the implementation of the following code
-	# if (place_meeting(next_x, next_y, layer_tilemap_get_id("terrain")) and !place_meeting(next_x, next_y, layer_tilemap_get_id("solid"))) and next_x > 0 and next_x < room_width - 8 and next_y > 0 and next_y < room_height - 8:
-		# global.colliders += self
-		# var collided = instance_place(next_x, next_y, obj_push)
-		# if instance_exists(collided):
-		#	collided.movement_direction = movement_direction
-		#	collided.shift_val = shift_val
-		#	# with collided do_move()
-	# else:
-		# global.colliders = []
+	var collided = move_and_collide(pos_to_pixels(next_pos) - pos_to_pixels(), true)
+	if collided != null:
+		collided = collided.get_collider()
+		if (
+			collided.get_groups().has("pushable")
+			and next_pos.x >= 0 and next_pos.x < global.room_dims.x
+			and next_pos.y >= 0 and next_pos.y < global.room_dims.y
+			and next_pos.z >= 0 and next_pos.z < global.room_dims.z
+			and next_pos.w >= 0 and next_pos.w < global.room_dims.w
+			):
+			# print("yeag")
+			collided.movement_direction = movement_direction
+			collided.shift_multiplier = shift_multiplier
+			global.colliders.append(collided)
+		else:
+			global.colliders = []
 	
 	for collider in global.colliders:
 		collider.slide = 0
+		
+	shift_multiplier = 1
 
 func _process(delta):
 	if slide < 1:

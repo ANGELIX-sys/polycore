@@ -1,18 +1,43 @@
-[gd_scene load_steps=4 format=3 uid="uid://13yfgvthfmke"]
+[gd_scene load_steps=6 format=3 uid="uid://13yfgvthfmke"]
 
 [ext_resource type="Texture2D" uid="uid://q7ytp7ysuvqs" path="res://sprites.png" id="1_oj3tl"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_cgngl"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_oj3tl"]
 atlas = ExtResource("1_oj3tl")
 region = Rect2(16, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cgngl"]
+atlas = ExtResource("1_oj3tl")
+region = Rect2(32, 32, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wd3ws"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oj3tl")
+}],
+"loop": true,
+"name": &"default1",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cgngl")
+}],
+"loop": true,
+"name": &"default2",
+"speed": 5.0
+}]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wd3ws"]
 size = Vector2(16, 16)
 
 [node name="Node2D" type="StaticBody2D"]
+collision_layer = 0
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = SubResource("AtlasTexture_cgngl")
+[node name="Sprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_wd3ws")
+animation = &"default2"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_wd3ws")

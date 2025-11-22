@@ -25,7 +25,3 @@ func _process(delta):
 		movement_direction = stored_dir
 		stored_dir = 0
 		do_move()
-
-func _physics_process(delta):
-	if !calculate_move:
-		pass
