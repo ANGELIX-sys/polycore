@@ -4,6 +4,9 @@ class_name Dyna extends RoomObject
 @export var movement_direction = dirs.NONE
 @export var next_pos: Vector4i = Vector4i(0, 0, 0, 0)
 
+# emitted when a Dynamic Object moves
+signal move
+
 func _ready():
 	current_pos = start_pos
 
@@ -46,19 +49,18 @@ func do_move():
 	var collided = move_and_collide(pos_to_pixels(next_pos) - pos_to_pixels(), true)
 	if collided != null:
 		collided = collided.get_collider()
-		if (
-			collided.get_groups().has("pushable")
-			and next_pos.x >= 0 and next_pos.x < global.room_dims.x
-			and next_pos.y >= 0 and next_pos.y < global.room_dims.y
-			and next_pos.z >= 0 and next_pos.z < global.room_dims.z
-			and next_pos.w >= 0 and next_pos.w < global.room_dims.w
-			):
-			# print("yeag")
-			collided.movement_direction = movement_direction
-			collided.shift_multiplier = shift_multiplier
-			global.colliders.append(collided)
+		if (next_pos.x >= 0 and next_pos.x < global.room_dims.x
+		and next_pos.y >= 0 and next_pos.y < global.room_dims.y
+		and next_pos.z >= 0 and next_pos.z < global.room_dims.z
+		and next_pos.w >= 0 and next_pos.w < global.room_dims.w
+		):
+			if collided.get_groups().has("pushable"):
+				collided.movement_direction = movement_direction
+				collided.shift_multiplier = shift_multiplier
+				get_tree().call_group("pushable", "move")
+		
 		else:
-			global.colliders = []
+			return
 	
 	for collider in global.colliders:
 		collider.slide = 0

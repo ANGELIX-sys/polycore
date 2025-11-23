@@ -19,7 +19,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4flbx"]
-size = Vector2(16, 16)
+size = Vector2(15, 15)
 
 [node name="Box" type="CharacterBody2D" groups=["pushable"]]
 motion_mode = 1

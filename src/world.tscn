@@ -31,3 +31,7 @@ tile_set = SubResource("TileSet_tlwt5")
 [node name="Box" parent="." instance=ExtResource("3_tlwt5")]
 position = Vector2(32, 32)
 start_pos = Vector4i(2, 2, 0, 0)
+
+[node name="Box2" parent="." instance=ExtResource("3_tlwt5")]
+position = Vector2(32, 16)
+start_pos = Vector4i(2, 1, 0, 0)
