@@ -3,11 +3,11 @@ class_name RoomObject extends CharacterBody2D
 # represents the zoom amount
 @export var zoom_val = 16
 # represents the starting position of an object
-@export var start_pos: Vector4i = Vector4i()
+@export var start_pos: Vector4i
 # represents the objects position in the current room
-@export var current_pos: Vector4i = Vector4i(0, 0, 0, 0)
+@export var current_pos: Vector4i
 # represents the current room the object is located in, NYI
-@export var current_loc: Vector4i = Vector4i(0, 0, 0, 0)
+@export var current_loc: Vector4i
 
 # converts a position in the room to pixel coordinates
 func pos_to_pixels(pos: Vector4i = current_pos):

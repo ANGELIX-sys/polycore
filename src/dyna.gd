@@ -7,9 +7,6 @@ class_name Dyna extends RoomObject
 # emitted when a Dynamic Object moves
 signal move
 
-func _ready():
-	current_pos = start_pos
-
 func do_slide():
 	if slide < 1:
 		position.x = lerp(position.x, pos_to_pixels(next_pos).x, slide)
@@ -45,22 +42,34 @@ func do_move():
 	if movement_direction == dirs.UP:
 		next_pos.w -= shift_multiplier
 	
-	global.colliders = [ self ] # Replace this line with the implementation of the following code
+	
+	#if (place_meeting(next_x, next_y, layer_tilemap_get_id("terrain")) and !place_meeting(next_x, next_y, layer_tilemap_get_id("solid"))) and next_x > 0 and next_x < room_width - 8 and next_y > 0 and next_y < room_height - 8 {
+	#	array_push(global.colliders, self)
+	#	var collided = instance_place(next_x, next_y, obj_push)
+	#	if instance_exists(collided) {
+	#		collided.movement_direction = movement_direction
+	#		collided.shift_val = shift_val
+	#		with collided do_move()
+	#	}
+	#} else {
+	#	global.colliders = []
+	#}
+	global.colliders = [ self ]
 	var collided = move_and_collide(pos_to_pixels(next_pos) - pos_to_pixels(), true)
 	if collided != null:
 		collided = collided.get_collider()
-		if (next_pos.x >= 0 and next_pos.x < global.room_dims.x
+		# if the collided object properties match these conditions
+		if (collided.get_groups().has("pushable")
+		# and it is in bounds
+		and next_pos.x >= 0 and next_pos.x < global.room_dims.x
 		and next_pos.y >= 0 and next_pos.y < global.room_dims.y
 		and next_pos.z >= 0 and next_pos.z < global.room_dims.z
 		and next_pos.w >= 0 and next_pos.w < global.room_dims.w
 		):
-			if collided.get_groups().has("pushable"):
-				collided.movement_direction = movement_direction
-				collided.shift_multiplier = shift_multiplier
-				get_tree().call_group("pushable", "move")
-		
-		else:
-			return
+			collided.movement_direction = movement_direction
+			collided.shift_multiplier = shift_multiplier
+			global.colliders.append(collided)
+		else: return
 	
 	for collider in global.colliders:
 		collider.slide = 0
