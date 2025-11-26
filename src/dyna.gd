@@ -1,4 +1,7 @@
 class_name Dyna extends RoomObject
+
+@onready var room_node: Node2D = $'/root/Room'
+
 @export var slide = 1.0
 @export var shift_multiplier = 1
 @export var movement_direction = dirs.NONE
@@ -6,6 +9,16 @@ class_name Dyna extends RoomObject
 
 # emitted when a Dynamic Object moves
 signal move
+
+# port of instance_position from GML; checks a position for an object and returns said object
+func instance_position(pos: Vector2, group: String):
+	var space = get_world_2d().direct_space_state
+	var point_query: PhysicsPointQueryParameters2D = PhysicsPointQueryParameters2D.new()
+	point_query.position = room_node.global_transform.translated(pos).origin
+	for i in space.intersect_point(point_query):
+		if i["collider"].is_in_group(group):
+			return i["collider"]
+	return null
 
 func do_slide():
 	if slide < 1:
@@ -54,14 +67,11 @@ func do_move():
 	#} else {
 	#	global.colliders = []
 	#}
-	global.colliders = [ self ]
-	var collided = move_and_collide(pos_to_pixels(next_pos) - pos_to_pixels(), true)
-	if collided != null:
-		collided = collided.get_collider()
-		# if the collided object properties match these conditions
-		if (collided.get_groups().has("pushable")
-		# and it is in bounds
-		and next_pos.x >= 0 and next_pos.x < global.room_dims.x
+	global.colliders.append(self)
+	var collided = instance_position(pos_to_pixels(next_pos), "pushable")
+	if collided != null and collided != self:
+		# if it is in bounds
+		if (next_pos.x >= 0 and next_pos.x < global.room_dims.x
 		and next_pos.y >= 0 and next_pos.y < global.room_dims.y
 		and next_pos.z >= 0 and next_pos.z < global.room_dims.z
 		and next_pos.w >= 0 and next_pos.w < global.room_dims.w
@@ -69,6 +79,7 @@ func do_move():
 			collided.movement_direction = movement_direction
 			collided.shift_multiplier = shift_multiplier
 			global.colliders.append(collided)
+			collided.do_move()
 		else: return
 	
 	for collider in global.colliders:
