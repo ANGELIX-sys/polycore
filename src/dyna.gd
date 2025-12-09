@@ -1,7 +1,5 @@
 class_name Dyna extends RoomObject
 
-@onready var room_node: Node2D = $'/root/Room'
-
 @export var slide = 1.0
 @export var shift_multiplier = 1
 @export var movement_direction = dirs.NONE
@@ -20,6 +18,30 @@ func instance_position(pos: Vector2, group: String):
 			return i["collider"]
 	return null
 
+# port of position_meeting from GML; same as instance_position but returns true if it collides
+func position_meeting(pos: Vector2, group: String):
+	var space = get_world_2d().direct_space_state
+	var point_query: PhysicsPointQueryParameters2D = PhysicsPointQueryParameters2D.new()
+	point_query.position = room_node.global_transform.translated(pos).origin
+	for i in space.intersect_point(point_query):
+		if i["collider"].is_in_group(group):
+			return true
+	return false
+
+func instance_place(pos: Vector2, group: String):
+	var space = get_world_2d().direct_space_state
+	var query = PhysicsShapeQueryParameters2D.new()
+	query.shape_rid = colshape_node.shape
+	query.transform = room_node.global_transform.translated(pos) * colshape_node.transform
+	var temp = space.intersect_shape(query)
+	for i in temp:
+		if i.collider.is_in_group(group) and not i.collider.is_in_group("queue_move") and not i.collider == self:
+			return i.collider
+	return null
+
+func place_meeting(pos: Vector2) -> bool:
+	return test_move(room_node.global_transform.translated(pos), Vector2(0,0))
+
 func do_slide():
 	if slide < 1:
 		position.x = lerp(position.x, pos_to_pixels(next_pos).x, slide)
@@ -32,60 +54,37 @@ func do_slide():
 			slide = 1
 
 func do_move():
+	# cancel movement if sliding is currently happening
 	if slide < 1:
 		return
 	
 	next_pos = current_pos
+	# next_pos adjustment value
+	match movement_direction:
+		dirs.EAST: next_pos.x += shift_multiplier
+		dirs.KATA: next_pos.z += shift_multiplier
+		dirs.SOUTH: next_pos.y += shift_multiplier
+		dirs.DOWN: next_pos.w += shift_multiplier
+		dirs.WEST: next_pos.x -= shift_multiplier
+		dirs.ANA: next_pos.z -= shift_multiplier
+		dirs.NORTH: next_pos.y -= shift_multiplier
+		dirs.UP: next_pos.w -= shift_multiplier
 	
-	# next_x/y adjustment value
-	if movement_direction == dirs.EAST:
-		next_pos.x += shift_multiplier
-	if movement_direction == dirs.KATA:
-		next_pos.z += shift_multiplier
-	if movement_direction == dirs.SOUTH:
-		next_pos.y += shift_multiplier
-	if movement_direction == dirs.DOWN:
-		next_pos.w += shift_multiplier
-	if movement_direction == dirs.WEST:
-		next_pos.x -= shift_multiplier
-	if movement_direction == dirs.ANA:
-		next_pos.z -= shift_multiplier
-	if movement_direction == dirs.NORTH:
-		next_pos.y -= shift_multiplier
-	if movement_direction == dirs.UP:
-		next_pos.w -= shift_multiplier
-	
-	
-	#if (place_meeting(next_x, next_y, layer_tilemap_get_id("terrain")) and !place_meeting(next_x, next_y, layer_tilemap_get_id("solid"))) and next_x > 0 and next_x < room_width - 8 and next_y > 0 and next_y < room_height - 8 {
-	#	array_push(global.colliders, self)
-	#	var collided = instance_place(next_x, next_y, obj_push)
-	#	if instance_exists(collided) {
-	#		collided.movement_direction = movement_direction
-	#		collided.shift_val = shift_val
-	#		with collided do_move()
-	#	}
-	#} else {
-	#	global.colliders = []
-	#}
-	global.colliders.append(self)
-	var collided = instance_position(pos_to_pixels(next_pos), "pushable")
-	if collided != null and collided != self:
-		# if it is in bounds
-		if (next_pos.x >= 0 and next_pos.x < global.room_dims.x
-		and next_pos.y >= 0 and next_pos.y < global.room_dims.y
-		and next_pos.z >= 0 and next_pos.z < global.room_dims.z
-		and next_pos.w >= 0 and next_pos.w < global.room_dims.w
-		):
+	# if it is in bounds
+	if (next_pos.x >= 0 and next_pos.x < global.room_dims.x
+	and next_pos.y >= 0 and next_pos.y < global.room_dims.y
+	and next_pos.z >= 0 and next_pos.z < global.room_dims.z
+	and next_pos.w >= 0 and next_pos.w < global.room_dims.w
+	):
+		# queue for movement
+		add_to_group("queue_move")
+		var collided = instance_place(pos_to_pixels(next_pos), "pushable")
+		if collided != null and collided != self:
+			collided.add_to_group("queue_move")
 			collided.movement_direction = movement_direction
 			collided.shift_multiplier = shift_multiplier
-			global.colliders.append(collided)
 			collided.do_move()
-		else: return
-	
-	for collider in global.colliders:
-		collider.slide = 0
-		
-	shift_multiplier = 1
+			
 
 func _process(delta):
 	if slide < 1:

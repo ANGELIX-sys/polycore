@@ -1,5 +1,8 @@
 class_name RoomObject extends CharacterBody2D
 
+@onready var room_node: Node2D = $'/root/Room'
+@onready var colshape_node = shape_owner_get_owner(0) # Returns the first child node which contains a collision shape
+
 # represents the zoom amount
 @export var zoom_val = 16
 # represents the starting position of an object

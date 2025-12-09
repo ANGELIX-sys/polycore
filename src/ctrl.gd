@@ -3,6 +3,7 @@ class_name Ctrl extends Dyna
 signal reset
 
 var stored_dir = dirs.NONE
+
 func _ready():
 	reset.connect(room_node._on_reset)
 

@@ -19,7 +19,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4flbx"]
-size = Vector2(15, 15)
+size = Vector2(12, 12)
 
 [node name="Box" type="CharacterBody2D" groups=["pushable"]]
 motion_mode = 1
@@ -31,5 +31,5 @@ animation = &"bocks"
 centered = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
+position = Vector2(8, 8)
 shape = SubResource("RectangleShape2D_4flbx")

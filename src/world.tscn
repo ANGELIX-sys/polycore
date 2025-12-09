@@ -21,7 +21,6 @@ sources/1 = SubResource("TileSetAtlasSource_036b0")
 pattern_0 = SubResource("TileMapPattern_tlwt5")
 
 [node name="Room" type="Node2D"]
-scale = Vector2(2, 2)
 script = ExtResource("1_aqk2v")
 
 [node name="Floor" type="TileMapLayer" parent="."]
@@ -31,14 +30,6 @@ tile_set = SubResource("TileSet_tlwt5")
 [node name="DynamicObjects" type="Node2D" parent="."]
 
 [node name="Player" parent="DynamicObjects" instance=ExtResource("1_fj7yv")]
-slide = null
-shift_multiplier = null
-movement_direction = null
-next_pos = null
-zoom_val = null
-start_pos = null
-current_pos = null
-current_loc = null
 
 [node name="Box" parent="DynamicObjects" instance=ExtResource("3_tlwt5")]
 position = Vector2(32, 32)
@@ -47,3 +38,6 @@ start_pos = Vector4i(2, 2, 0, 0)
 [node name="Box2" parent="DynamicObjects" instance=ExtResource("3_tlwt5")]
 position = Vector2(32, 16)
 start_pos = Vector4i(2, 1, 0, 0)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+offset = Vector2(128, 128)
