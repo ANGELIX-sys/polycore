@@ -12,5 +12,6 @@ func _process(delta):
 		do_move()
 		for obj in get_tree().get_nodes_in_group("queue_move"):
 			obj.slide = 0
+			obj.remove_from_group("queue_move")
 		shift_multiplier = 1
 		# move.emit()

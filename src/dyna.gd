@@ -4,6 +4,7 @@ class_name Dyna extends RoomObject
 @export var shift_multiplier = 1
 @export var movement_direction = dirs.NONE
 @export var next_pos: Vector4i = Vector4i(0, 0, 0, 0)
+@export var movable: bool = false
 
 # emitted when a Dynamic Object moves
 signal move
@@ -77,14 +78,19 @@ func do_move():
 	and next_pos.w >= 0 and next_pos.w < global.room_dims.w
 	):
 		# queue for movement
+		movable = true
 		add_to_group("queue_move")
 		var collided = instance_place(pos_to_pixels(next_pos), "pushable")
 		if collided != null and collided != self:
-			collided.add_to_group("queue_move")
 			collided.movement_direction = movement_direction
 			collided.shift_multiplier = shift_multiplier
 			collided.do_move()
-			
+			if collided.movable:
+				collided.add_to_group("queue_move")
+			else:
+				remove_from_group("queue_move")
+				movable = false
+	else: movable = false
 
 func _process(delta):
 	if slide < 1:
